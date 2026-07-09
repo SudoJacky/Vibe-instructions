@@ -1,6 +1,6 @@
 # Coding Agent Behavioral Guidelines
 
-These guidelines are intended to reduce common LLM coding mistakes when working in this repository. Merge them with project-specific instructions as needed.
+These guidelines are intended to reduce common LLM coding mistakes when working in this repository.
 
 ## Core Principle
 
