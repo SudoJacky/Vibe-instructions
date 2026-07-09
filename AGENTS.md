@@ -1,369 +1,169 @@
-# Coding Agent Behavioral Guidelines
+# Coding Agent Guidelines
 
-These guidelines are intended to reduce common LLM coding mistakes when working in this repository.
+These guidelines are meant to reduce common LLM coding mistakes. Prefer small, correct, observable, well-tested changes over fast, broad, clever, or speculative ones.
 
-## Core Principle
-
-Prefer small, correct, observable, and well-verified changes over fast, broad, clever, or speculative changes.
-
-These guidelines intentionally bias toward caution. For trivial or clearly bounded tasks, use judgment and avoid unnecessary process.
+Use judgment for trivial tasks. Do not add unnecessary process when the request is simple.
 
 ---
 
 ## 1. Think Before Coding
 
-### Principle
+Before making changes:
 
-Do not assume. Do not hide confusion. Surface ambiguity and tradeoffs before implementing.
+- State important assumptions.
+- Ask for clarification when ambiguity would change the implementation.
+- If ambiguity is minor, state your assumption and proceed.
+- Mention meaningful tradeoffs instead of silently choosing.
+- Push back if the requested approach seems risky, overcomplicated, or misaligned with the goal.
 
-### Rules
-
-- State important assumptions explicitly.
-- If the request has multiple plausible interpretations, mention them instead of silently choosing one.
-- If ambiguity would materially change the implementation, ask for clarification before editing.
-- If ambiguity is minor and low-risk, state the assumption and proceed.
-- If a simpler approach exists, call it out.
-- Push back when a requested approach seems unnecessarily complex, risky, or misaligned with the goal.
-- If something is genuinely unclear, stop and name what is confusing.
-
-### Check
-
-Before coding, ask:
-
-> Do I understand the goal, constraints, and expected behavior well enough to make the change safely?
+Do not pretend to understand unclear requirements.
 
 ---
 
-## 2. Simplicity First
+## 2. Keep It Simple
 
-### Principle
+Write the minimum code needed to solve the actual problem.
 
-Write the minimum code that correctly solves the problem.
+Avoid:
 
-### Rules
+- Extra features
+- Premature abstractions
+- Unrequested configurability
+- Unnecessary dependencies
+- Error handling for impossible or irrelevant cases
+- Large rewrites when a small change would work
 
-- Do not add features beyond what was requested.
-- Do not create abstractions for single-use code.
-- Do not add flexibility, configurability, or extensibility unless explicitly needed.
-- Do not introduce new dependencies unless clearly justified.
-- Do not add error handling for impossible or irrelevant scenarios.
-- If a solution is much longer than necessary, simplify it.
-
-### Check
-
-Before finalizing, ask:
-
-> Would a senior engineer consider this overcomplicated?
-
-If yes, rewrite it smaller and clearer.
+If the solution feels overengineered, simplify it.
 
 ---
 
 ## 3. Make Surgical Changes
 
-### Principle
-
-Touch only what is required. Clean up only what your change affects.
-
-### Rules
+Touch only what the task requires.
 
 When editing existing code:
 
-- Do not “improve” adjacent code, comments, formatting, or structure unless necessary for the task.
 - Do not refactor unrelated code.
+- Do not clean up adjacent code unless required.
 - Do not rename things unnecessarily.
-- Match the existing project style, even if you would personally choose differently.
-- If you notice unrelated dead code, questionable patterns, or possible bugs, mention them separately instead of changing them.
+- Match the existing project style.
+- Mention unrelated issues separately instead of fixing them silently.
 
-When your own changes create unused code:
+Clean up anything made unused by your own change, such as imports, variables, tests, mocks, or files.
 
-- Remove imports, variables, functions, tests, mocks, or files made unused by your change.
-- Do not remove pre-existing dead code unless explicitly asked.
-
-### Check
-
-Before finalizing, ask:
-
-> Does every changed line trace directly back to the user’s request?
+Every changed line should trace back to the user’s request.
 
 ---
 
-## 4. Work From Verifiable Goals
+## 4. Work Toward Verifiable Goals
 
-### Principle
+Turn vague tasks into concrete success criteria.
 
-Convert vague tasks into concrete, testable success criteria.
+Examples:
 
-### Rules
+- “Fix the bug” means reproduce or identify the failure, then fix the root cause.
+- “Add validation” means cover invalid inputs, then make the checks pass.
+- “Refactor X” means preserve behavior before and after the change.
 
-Translate requests into verifiable outcomes:
-
-- “Add validation” means adding tests for invalid inputs, then making them pass.
-- “Fix the bug” means reproducing or identifying the failure, then fixing the root cause.
-- “Refactor X” means confirming behavior before and after the change.
-- “Improve reliability” means identifying failure modes, adding coverage or observability, then verifying the result.
-
-For multi-step tasks, state a brief plan before making changes.
-
-Example plan format:
+For non-trivial work, make a short plan:
 
 1. Identify the current behavior.
-   - Verify by: running or reading the relevant test, code path, or reproduction.
 2. Make the smallest targeted change.
-   - Verify by: checking the changed behavior directly.
-3. Run relevant validation.
-   - Verify by: tests, type checks, linting, build, or manual reproduction.
+3. Verify with relevant tests, checks, or manual reproduction.
 
-### Check
-
-Before implementing, ask:
-
-> What observable result will prove this task is complete?
+Do not treat a task as complete until the result has been verified.
 
 ---
 
-## 5. Fail Fast: Never Hide Errors
+## 5. Fail Fast and Surface Errors
 
-### Principle
+Do not hide real problems.
 
-Errors must not pass silently. Do not hide failures with fallback logic that masks real problems.
+Avoid:
 
-### Rules
+- Swallowing exceptions
+- Silent fallbacks that mask broken assumptions
+- Fake success values
+- Quiet no-ops for failed operations
+- Suppressing logs, test failures, or validation failures
 
-- Do not catch errors just to ignore them.
-- Do not return fake success values when an operation failed.
-- Do not add broad fallback behavior that hides broken assumptions.
-- Do not convert hard failures into quiet no-ops unless explicitly required.
-- Do not suppress logs, exceptions, test failures, or validation failures to make the system appear healthy.
-- Let broken states fail clearly so the real issue can be found and fixed.
-
-### Check
-
-Before finalizing, ask:
-
-> If this fails again, will the failure be visible and understandable?
-
-A clear failure is better than a hidden corrupted state.
+A clear failure is better than hidden corruption or misleading success.
 
 ---
 
 ## 6. Fix Root Causes, Not Symptoms
 
-### Principle
+Do not paper over bugs with narrow patches.
 
-Do not paper over bugs. Fix the cause, not just the observed symptom.
-
-### Rules
-
-When a problem appears:
+When fixing a problem:
 
 - Reproduce or reason through the failure.
-- Identify the root cause before changing code.
-- Avoid narrow patches that only handle the observed example.
-- Avoid special-case fixes unless the domain truly requires them.
-- Do not add “small fixes” that merely hide the issue.
-- Fix the problem at the correct layer of the system.
-- If the root cause cannot be determined from available information, say so clearly and add diagnostics instead of pretending the bug is fixed.
+- Identify the root cause.
+- Fix the issue at the correct layer.
+- Avoid special cases unless the domain truly requires them.
+- Do not claim a bug is fixed if only the symptom was hidden.
 
-### Check
-
-Before finalizing a bug fix, ask:
-
-> Did I fix why this happened, or only make this instance disappear?
-
-Papering over bugs creates hidden liabilities that become harder to control later.
+If there is not enough information to determine the cause, say so and add the minimum diagnostics needed to investigate the next occurrence.
 
 ---
 
-## 7. Make Problems Observable
+## 7. Make Code Observable and Debuggable
 
-### Principle
+Important paths should be traceable.
 
-If a problem is hard to diagnose, improve observability instead of guessing.
+Add useful logs, metrics, traces, or error context when they help diagnose real problems.
 
-### Rules
+Good diagnostics should clarify:
 
-When appropriate, add useful logs, metrics, traces, or error context around critical paths.
+- What operation was attempted
+- Which inputs, IDs, or entities were involved
+- Which branch or state transition occurred
+- Which external dependency was called
+- What failed and why, when known
 
-Good observability should help answer:
+Do not log secrets, credentials, tokens, private user data, or sensitive payloads.
 
-- What operation was attempted?
-- What inputs, IDs, or entities were involved?
-- Which branch or state transition occurred?
-- What external dependency or subsystem was called?
-- What failed, and with what error?
-- What request ID, correlation ID, job ID, user ID, file ID, or entity ID can help trace the issue?
-
-Do not log:
-
-- Secrets
-- Credentials
-- Tokens
-- Private user data
-- Sensitive payloads
-- Excessive noisy data that makes debugging harder
-
-### Check
-
-Before finalizing, ask:
-
-> If this issue happens again, will we have enough information to investigate it?
-
-If not, add the minimum useful diagnostics.
+Prefer clear control flow, explicit state transitions, and actionable error messages.
 
 ---
 
-## 8. Design for Debugging and Traceability
+## 8. Keep Documentation in Sync
 
-### Principle
+When code changes affect architecture, APIs, setup steps, workflows, product behavior, or operational assumptions, update the relevant documentation in the same change.
 
-Critical paths should be easy to trace and debug later.
-
-### Rules
-
-For important workflows, make it possible to understand:
-
-- Where the request entered the system.
-- What decisions were made.
-- What external calls were performed.
-- What state changed.
-- Where a failure occurred.
-- Why the failure occurred, when that information is available.
-
-Prefer:
-
-- Clear control flow over clever code.
-- Explicit state transitions over implicit side effects.
-- Actionable error messages over generic failures.
-- Focused logs over noisy logs.
-- Debuggable behavior over hidden magic.
-
-### Check
-
-Before finalizing, ask:
-
-> Could another engineer debug this path without reverse-engineering the entire system?
+Keep documentation accurate, current, and focused on a single source of truth. Remove or revise docs made outdated by your change.
 
 ---
 
-## 9. Keep Documentation Alive
-
-### Principle
-
-Documentation must evolve with the code and remain a single source of truth.
-
-### Rules
-
-When changing key technical decisions, architecture, APIs, workflows, setup steps, product behavior, or operational assumptions:
-
-- Update the relevant documentation in the same change.
-- Keep documentation consistent with the actual implementation.
-- Remove or revise outdated instructions created by your change.
-- Avoid duplicating explanations across multiple places.
-- Prefer one canonical source of truth.
-- If documentation exists in multiple places, update all affected references or consolidate them when appropriate.
-
-### Check
-
-Before finalizing, ask:
-
-> Did this change make any existing documentation outdated or incomplete?
-
-Do not let documentation become stale while the code moves forward.
-
----
-
-## 10. Test and Verify Changes
-
-### Principle
-
-A task is not complete until the relevant behavior has been verified.
-
-### Rules
-
-Use the project’s existing verification methods whenever possible:
-
-- Unit tests
-- Integration tests
-- Type checks
-- Linters
-- Build commands
-- Manual reproduction steps
-- Snapshot updates, only when intentionally required
-
-For bug fixes:
-
-1. Reproduce the issue if possible.
-2. Add or identify a test that fails before the fix.
-3. Implement the smallest correct fix.
-4. Confirm the test passes.
-5. Run relevant surrounding checks.
-
-For refactors:
-
-1. Confirm current behavior.
-2. Make the smallest safe transformation.
-3. Confirm behavior remains unchanged.
-
-If verification cannot be run, explain why and state what should be run.
-
-### Check
-
-Before finalizing, ask:
-
-> What evidence proves this change works?
-
----
-
-## 11. Communicate Clearly
-
-### Principle
-
-Be concise, explicit, and honest about uncertainty.
-
-### Rules
+## 9. Communicate Clearly
 
 When starting non-trivial work:
 
 - Summarize the goal.
 - State assumptions.
-- Identify meaningful ambiguity.
+- Note meaningful ambiguity.
 - Give a short plan with verification steps.
 
-When finishing work:
+When finishing:
 
 - Summarize what changed.
-- Mention the files touched.
-- Describe how the change was verified.
-- Note remaining risks, limitations, or follow-up work.
+- Mention files touched.
+- Explain how it was verified.
+- Note remaining risks or limitations.
 
-Do not:
-
-- Over-explain obvious edits.
-- Hide uncertainty.
-- Claim something is fixed when it was only partially investigated.
-- Pretend verification happened when it did not.
-
-### Check
-
-Before responding, ask:
-
-> Did I clearly explain what changed, how it was verified, and what uncertainty remains?
+Do not claim verification happened if it did not.
 
 ---
 
-## 12. Definition of Good Behavior
+## Definition of Good Behavior
 
 These guidelines are working when:
 
-- Diffs are smaller and more focused.
-- Fewer unrelated files are changed.
-- Fewer rewrites are needed due to overcomplication.
-- Clarifying questions happen before implementation mistakes.
+- Diffs are small and focused.
+- Unrelated files are not changed.
 - Bugs are fixed at the root cause.
-- Errors are visible instead of silently swallowed.
-- Critical paths are easier to debug.
-- Logs and diagnostics help locate real issues.
+- Errors are visible instead of hidden.
+- Important paths are easier to debug.
 - Documentation stays aligned with the code.
 - Verification is clear and repeatable.
 
