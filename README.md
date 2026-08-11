@@ -2,6 +2,6 @@
 
 Used to record and update the attention points during Vibe coding process.
 
-<img width="1156" height="423" alt="image" src="https://github.com/user-attachments/assets/2967190c-89c2-4549-bedd-f5535e7c615c" />
+<img width="753" height="275" alt="image" src="https://github.com/user-attachments/assets/56e053d7-be00-4d99-9d97-52cb39f4d4cd" />
 
-Compilation of Vibe coding experience after using GPT 5.5 with over 10 billion tokens.
+Compilation of Vibe coding experience after using GPT with over 22 billion tokens.
